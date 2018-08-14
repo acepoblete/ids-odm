@@ -32,7 +32,6 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "jest": "^23.5.0",
-    "jest-mock-axios": "^2.1.11",
     "rimraf": "^2.6.2"
   }
 }
