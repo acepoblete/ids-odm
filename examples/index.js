@@ -1,6 +1,6 @@
 import IdsDocument from '../'
 
-export default class MyClass {
+export default class MyClass extends IdsDocument {
 
     collectionName = 'MyCollectionName'
     properties = {
