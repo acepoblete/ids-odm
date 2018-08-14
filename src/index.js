@@ -1,0 +1,1 @@
+export { default as IdsDocument } from './ids-document'

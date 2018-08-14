@@ -1,0 +1,5 @@
+process.env.IRIS_IDS_SERVER_URL = 'dis-url'
+process.env.IRIS_AUM_APP_KEY = 'foo'
+process.env.IRIS_AUM_APP_SECRET = 'bar'
+process.env.IRIS_AUM_SERVER_URL = 'aum-url'
+process.env.IRIS_IDS_USERID = 'userId'

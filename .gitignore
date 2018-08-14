@@ -1,0 +1,9 @@
+.env
+.compiled
+_jest-editor/
+.vscode/symbols.json
+coverage/
+integrations/create-react-example/node_modules
+node_modules/
+out/
+lib/

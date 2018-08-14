@@ -1,0 +1,38 @@
+{
+  "name": "ids-odm",
+  "version": "1.0.0",
+  "description": "js odm for IDS",
+  "main": "lib/index.js",
+  "author": "Dan Poblete",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn debug:compile:watch",
+    "debug:clean": "rimraf .compiled",
+    "debug:compile": "babel src -s -D --ignore **/*.test.js --out-dir .compiled",
+    "debug:compile:watch": "babel src -s -D -w --ignore **/*.test.js --out-dir .compiled",
+    "debug": "npm run debug:clean && npm run debug:compile",
+    "prebuild": "rimraf lib",
+    "build": "babel src -s -D --ignore **/*.test.js --out-dir lib",
+    "test": "jest .test.js --coverage"
+  },
+  "dependencies": {
+    "ajv": "^6.5.2",
+    "ajv-error-messages": "^1.0.2",
+    "axios": "^0.18.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "dotenv": "^6.0.0",
+    "js-data": "3.0.2",
+    "js-data-http": "^3.0.0",
+    "js-data-http-node": "^3.0.0",
+    "moment": "^2.22.2",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.5.0",
+    "jest-mock-axios": "^2.1.11",
+    "rimraf": "^2.6.2"
+  }
+}
