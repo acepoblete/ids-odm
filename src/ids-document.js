@@ -1,31 +1,38 @@
 import moment from 'moment'
 import Ajv from 'ajv'
 import normalizeErrors from 'ajv-error-messages'
+import merge from 'lodash.merge';
 
 import * as IdsAxios from './ids-axios'
 import { wrap } from './ids-proxy'
 
+import { defaults as schemaDefaults } from './ids-schema'
+import { toDate, dateTransformer, idTransformer, runTransformers } from './utils'
+
 export default class IdsDocument {
+
     // name of the class in ids
     collectionName = null
+    // schema defaults
+    schemaOverride = {}
     // json schema for validation
-    properties = {}
+    properties = null
     // required properties
     required = []
     // data from ids doctored up
     attributes = {}
     // raw data from ids
     originals = {}
-    // schema for validation
-    schema = null
     // ajv 
     __ajv = null
+    // schema
+    schema = null
 
     // 
     // constructor
     //     
 
-    constructor(obj = undefined, opts = undefined) {
+    constructor(obj = undefined) {
         this._populate(obj)
         return wrap(this)
     }
@@ -67,24 +74,28 @@ export default class IdsDocument {
     //
 
     async save() {
+        if (this.id)
+            return await this.update()
+        return await this.insert()
+    }
+
+    async insert() {
         // init our schema
         this._schemaInit() // will throw errors if the schema is bad
         // check to see if we have good data
         this._validate()
 
-        return await IdsAxios.update(this.collectionName, this.id, this.attributes)
+        return await IdsAxios.create(this.collectionName, this._cast())
             .then(r => this._transformResults(r))
     }
 
     async update() {
-        return await IdsAxios.update(this.collectionName, this.id, this.attributes)
+        debugger
+        // we don't do validation on update cuz
+        // things get weird...even mongoose has some
+        // stickly logic around updates...not really worth it
+        return await IdsAxios.update(this.collectionName, this.id, this._cast())
             .then(r => this._transformResults(r))
-    }
-
-    async saveOrUpdate() {
-        if (this.id)
-            return await this.update()
-        return await this.save()
     }
 
     async delete() {
@@ -146,12 +157,20 @@ export default class IdsDocument {
         if (this.__ajv)
             return // we only wanna do this once per object
 
+        if (this.schema)
+            return
+
+        // merge schema defaults with overrides and properties
+        const schema = merge(schemaDefaults, this.schemaOverride)
+        schema.properties = merge(schema.properties, this.properties)
+        this.schema = schema
+
         this.__ajv = new Ajv({ allErrors: true })
-        this.__ajv.addSchema(this.schema, this.collectionName)
-            .compile(this.schema)
+        this.__ajv.addSchema(schema, this.collectionName)
+            .compile(schema)
     }
 
-    _validate() {
+    _cast() {
         // keep track of data
         const data = { ...this.attributes }
         // get our schema so we can find properties of 
@@ -165,8 +184,11 @@ export default class IdsDocument {
             if (data[key])
                 data[key] = data[key].valueOf()
         })
+        return data
+    }
 
-        if (!this.__ajv.validate(this.collectionName, data))
+    _validate() {
+        if (!this.__ajv.validate(this.collectionName, this._cast()))
             throw this.__ajv.errors
     }
 
@@ -177,27 +199,4 @@ export default class IdsDocument {
     toJSON() {
         return this.attributes
     }
-}
-
-const toDate = (obj, prop) => {
-    if (obj && obj[prop] && (!moment.isDate(obj[prop]) && !moment.isMoment(obj[prop])))
-        obj[prop] = moment.utc(obj[prop])
-}
-
-const dateTransformer = obj => {
-    toDate(obj, 'updatedAt')
-    toDate(obj, 'createdAt')
-}
-
-const idTransformer = obj => {
-    if (obj && obj.id) {
-        const { id } = obj
-        delete obj.id
-        obj.objectId = id
-    }
-}
-
-const runTransformers = obj => {
-    idTransformer(obj)
-    dateTransformer(obj)
 }
