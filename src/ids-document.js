@@ -1,7 +1,8 @@
 import moment from 'moment'
 import Ajv from 'ajv'
 import normalizeErrors from 'ajv-error-messages'
-import merge from 'lodash.merge';
+import merge from 'lodash.merge'
+import isEmpty from 'lodash.isempty'
 
 import * as IdsAxios from './ids-axios'
 import { wrap } from './ids-proxy'
@@ -42,6 +43,8 @@ export default class IdsDocument {
     //
 
     static async create(obj) {
+        if(isEmpty(obj))
+            throw new Error('object can not be empty')
         const instance = new this.prototype.constructor(obj)
         await instance.save()
         return instance
@@ -90,7 +93,6 @@ export default class IdsDocument {
     }
 
     async update() {
-        debugger
         // we don't do validation on update cuz
         // things get weird...even mongoose has some
         // stickly logic around updates...not really worth it
